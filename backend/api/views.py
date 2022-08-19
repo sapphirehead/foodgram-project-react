@@ -1,27 +1,25 @@
+from api.mixins import AddDelMixin
 from django.db.models import Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.serializers import SetPasswordSerializer
+from recipes.models import (Favorites, Follow, Ingredient, Recipe,
+                            RecipeIngredient, ShoppingCart, Tag)
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
                                    HTTP_400_BAD_REQUEST)
-
-from recipes.models import (Favorites, Follow, Ingredient, Recipe,
-                            RecipeIngredient, ShoppingCart, Tag)
 from users.models import User
 
 from .filters import IngredientSearchFilter, RecipeFilter
 from .pagination import RecipeListPagination, UserListPagination
 from .permissions import AuthorOrReadOnly
 from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
-                          FavoritesSerializer, FollowSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          TagSerializer)
+                          FollowSerializer, IngredientSerializer,
+                          RecipeSerializer, TagSerializer)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -30,7 +28,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (permissions.AllowAny,)
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet, AddDelMixin):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     pagination_class = RecipeListPagination
@@ -40,61 +38,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[permissions.IsAuthenticated])
-    def favorite(self, request, pk):
+    def favorite(self, request, pk=None):
         if request.method == 'POST':
-            user = request.user
-            recipe = get_object_or_404(Recipe, id=pk)
-            if Favorites.objects.filter(user=user, recipe=recipe).exists():
-                return Response(
-                    {'errors': f'Рецепт: {recipe.name} - '
-                               f'уже находится в избранном у {user.username}'},
-                    status=HTTP_400_BAD_REQUEST
-                )
-            Favorites.objects.create(user=user, recipe=recipe)
-            serializer = FavoritesSerializer(recipe)
-            return Response(serializer.data, status=HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            user = request.user
-            recipe = get_object_or_404(Recipe, id=pk)
-            obj = Favorites.objects.filter(user=user, recipe__id=pk)
-            if obj.exists():
-                obj.delete()
-                return Response(status=HTTP_204_NO_CONTENT)
-            return Response(
-                {'errors': f'У {user.username} '
-                           f'в избранном нет рецепта: {recipe.name}'},
-                status=HTTP_400_BAD_REQUEST
-            )
+            return self.create_obj(Favorites, request.user, pk)
+        elif request.method == 'DELETE':
+            return self.delete_obj(Favorites, request.user, pk)
+        return None
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[permissions.IsAuthenticated])
-    def shopping_cart(self, request, pk):
+    def shopping_cart(self, request, pk=None):
         if request.method == 'POST':
-            user = request.user
-            recipe = get_object_or_404(Recipe, id=pk)
-            if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
-                return Response(
-                    {'errors': f'Рецепт: {recipe.name} - '
-                               f'уже есть в покупках у {user.username}'},
-                    status=HTTP_400_BAD_REQUEST
-                )
-            ShoppingCart.objects.create(user=user, recipe=recipe)
-            serializer = FavoritesSerializer(recipe)
-            return Response(serializer.data, status=HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            user = request.user
-            recipe = get_object_or_404(Recipe, id=pk)
-            obj = ShoppingCart.objects.filter(user=user, recipe__id=pk)
-            if obj.exists():
-                obj.delete()
-                return Response(status=HTTP_204_NO_CONTENT)
-            return Response(
-                {'errors': f'У {user.username} '
-                           f'в покупках нет рецепта: {recipe.name}'},
-                status=HTTP_400_BAD_REQUEST
-            )
+            return self.create_obj(ShoppingCart, request.user, pk)
+        elif request.method == 'DELETE':
+            return self.delete_obj(ShoppingCart, request.user, pk)
+        return None
 
     @action(
         detail=False, url_path='download_shopping_cart',
@@ -120,7 +78,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     pagination_class = UserListPagination
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = [permissions.AllowAny]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -198,12 +156,12 @@ class CustomUserViewSet(viewsets.ModelViewSet):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
-    permissions_classes = (permissions.IsAuthenticated,)
+    permissions_classes = [permissions.IsAuthenticated]
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = (permissions.AllowAny,)
-    filter_backends = (IngredientSearchFilter,)
-    search_fields = ('^name',)
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [IngredientSearchFilter]
+    search_fields = ['^name']
