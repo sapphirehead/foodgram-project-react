@@ -7,7 +7,7 @@ from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
-    """To insert data into the database."""
+    """Для загрузки данных (иннгредиентов) в базу."""
     def handle(self, *args, **kwargs):
         with open(f'{settings.BASE_DIR}/data/ingredients.json', 'rb') as f:
             data = json.load(f)

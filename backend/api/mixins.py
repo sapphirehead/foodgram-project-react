@@ -1,9 +1,11 @@
-from api.serializers import FavoritesSerializer
 from django.shortcuts import get_object_or_404
-from recipes.models import Recipe
+
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
                                    HTTP_400_BAD_REQUEST)
+
+from api.serializers import FavoritesSerializer
+from recipes.models import Recipe
 
 
 class AddDelMixin:
@@ -12,9 +14,10 @@ class AddDelMixin:
     def create_obj(self, model, user, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         if model.objects.filter(user=user, recipe=recipe).exists():
-            return Response({
-                'errors': f'{recipe.name} уже добавлен в список у {user.username}!'
-            }, status=HTTP_400_BAD_REQUEST)
+            return Response(
+                {'errors': f'{recipe.name} '
+                           f'уже добавлен в список у {user.username}!'},
+                status=HTTP_400_BAD_REQUEST)
         model.objects.create(user=user, recipe=recipe)
         serializer = FavoritesSerializer(recipe)
         return Response(serializer.data, status=HTTP_201_CREATED)

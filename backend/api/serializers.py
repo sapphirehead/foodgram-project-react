@@ -68,7 +68,6 @@ class CustomUserSerializer(UserSerializer):
 
 
 class RecipeIngredientsSerializer(serializers.HyperlinkedModelSerializer):
-
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -76,7 +75,7 @@ class RecipeIngredientsSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = RecipeIngredient
-        fields = ('id', 'name', 'measurement_unit', 'amount', )
+        fields = ('id', 'name', 'measurement_unit', 'amount',)
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -237,11 +236,11 @@ class FollowSerializer(serializers.ModelSerializer):
                   'recipes_count')
 
     def get_recipes(self, obj):
-        # request = self.context.get('request')
-        # limit = request.GET.get('recipes_limit')
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
         queryset = Recipe.objects.filter(author=obj.author)
-        # if limit:
-        #    queryset = queryset[:int(limit)]
+        if limit:
+            queryset = queryset[:int(limit)]
         return FavoritesSerializer(queryset, many=True).data
 
     def get_is_subscribed(self, obj):
