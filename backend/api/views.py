@@ -1,19 +1,17 @@
+from api.mixins import AddDelMixin
 from django.db.models import Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.serializers import SetPasswordSerializer
+from recipes.models import (Favorites, Follow, Ingredient, Recipe,
+                            RecipeIngredient, ShoppingCart, Tag)
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
                                    HTTP_400_BAD_REQUEST)
-
-from api.mixins import AddDelMixin
-from recipes.models import (Favorites, Follow, Ingredient, Recipe,
-                            RecipeIngredient, ShoppingCart, Tag)
 from users.models import User
 
 from .filters import IngredientSearchFilter, RecipeFilter
