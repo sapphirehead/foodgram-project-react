@@ -95,33 +95,31 @@ class CustomUserViewSet(viewsets.ModelViewSet):
             permission_classes=[permissions.IsAuthenticated])
     def subscribe(self, request, pk):
         if request.method == 'POST':
-            user = request.user
             author = get_object_or_404(User, id=pk)
-            if Follow.objects.filter(user=user, author=author).exists():
+            if Follow.objects.filter(user=request.user, author=author).exists():
                 return Response(
-                    {'errors': f'{user.username} '
+                    {'errors': f'{request.user.username} '
                                f'уже подписан на {author.username}'},
                     status=HTTP_400_BAD_REQUEST
                 )
-            if user == author:
+            if request.user == author:
                 return Response(
                     {'errors': 'Нельзя подписаться на самого себя'},
                     status=HTTP_400_BAD_REQUEST
                 )
-            follow = Follow.objects.create(user=user, author=author)
+            follow = Follow.objects.create(user=request.user, author=author)
             serializer = FollowSerializer(follow,
                                           context={'request': request})
             return Response(serializer.data, status=HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            user = request.user
             author = get_object_or_404(User, id=pk)
-            obj = Follow.objects.filter(user=user, author__id=pk)
+            obj = Follow.objects.filter(user=request.user, author__id=pk)
             if obj.exists():
                 obj.delete()
                 return Response(status=HTTP_204_NO_CONTENT)
             return Response(
-                {'errors': f'{user.username} '
+                {'errors': f'{request.user.username} '
                            f'не подписан на {author.username}'},
                 status=HTTP_400_BAD_REQUEST
             )

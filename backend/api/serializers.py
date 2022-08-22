@@ -8,12 +8,6 @@ from rest_framework import serializers
 from users.models import User
 
 
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ('id', 'name', 'color', 'slug',)
-
-
 class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
@@ -63,6 +57,12 @@ class CustomUserSerializer(UserSerializer):
         user = self.context['request'].user
         author = get_object_or_404(User, pk=obj.id)
         return Follow.objects.filter(user=user, author=author).exists()
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ('id', 'name', 'color', 'slug',)
 
 
 class RecipeIngredientsSerializer(serializers.HyperlinkedModelSerializer):

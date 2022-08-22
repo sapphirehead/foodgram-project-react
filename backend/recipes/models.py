@@ -52,7 +52,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
+        ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
 
@@ -166,10 +166,10 @@ class RecipeIngredient(models.Model):
     class Meta:
         verbose_name = 'Рецепт и ингредиент'
         verbose_name_plural = 'Рецепт и ингредиенты'
-        constraints = [
-            models.UniqueConstraint(fields=['ingredient', 'recipe_id'],
-                                    name='unique_ingredients_recipes')
-        ]
+        constraints = (
+            models.UniqueConstraint(fields=('ingredient', 'recipe_id'),
+                                    name='unique_ingredients_recipes'),
+        )
 
     def __str__(self):
         return f'{self.ingredient} - {self.amount}'
@@ -194,13 +194,13 @@ class Favorites(models.Model):
     )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ('-id',)
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique_favorite')
-        ]
+        constraints = (
+            models.UniqueConstraint(fields=('user', 'recipe'),
+                                    name='unique_favorite'),
+        )
 
     def __str__(self):
         return f'{self.user} - {self.recipe}'
@@ -225,13 +225,13 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ('-id',)
         verbose_name = 'Покупка'
         verbose_name_plural = 'Покупки'
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique_shopping_cart')
-        ]
+        constraints = (
+            models.UniqueConstraint(fields=('user', 'recipe'),
+                                    name='unique_shopping_cart'),
+        )
 
     def __str__(self):
         return f'{self.user} - {self.recipe}'
