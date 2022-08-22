@@ -1,10 +1,12 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
 from recipes.models import (Favorites, Follow, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
-from rest_framework import serializers
 from users.models import User
 
 
@@ -76,7 +78,7 @@ class RecipeIngredientsSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount',)
 
 
-class RecipeSerializer(serializers.ModelSerializer):
+class BaseRecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField(use_url=True, max_length=None)
     tags = TagSerializer(read_only=True, many=True)
     author = CustomUserSerializer(read_only=True)
@@ -84,6 +86,15 @@ class RecipeSerializer(serializers.ModelSerializer):
                                               read_only=True, many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+
+    def get_is_in_list(self, model, obj):
+        if self.context['request'].auth is None:
+            return False
+        user = self.context['request'].user
+        return model.objects.filter(user=user, recipe=obj).exists()
+
+
+class RecipeSerializer(BaseRecipeSerializer):
 
     class Meta:
         model = Recipe
@@ -99,19 +110,11 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'cooking_time')
         read_only_fields = ('is_favorite', 'is_shopping_cart')
 
-    def get_is_favorited(self, obj):
-        if self.context['request'].auth is None:
-            return False
-        user = self.context['request'].user
-        return Favorites.objects.filter(user=user, recipe=obj).exists()
+    def favorited(self, obj):
+        return self.get_is_in_list(Favorites, obj)
 
-    def get_is_in_shopping_cart(self, obj):
-        if self.context['request'].auth is None:
-            return False
-        user = self.context['request'].user
-        if ShoppingCart.objects.filter(user=user, recipe=obj).exists():
-            return True
-        return False
+    def shopping_cart(self, obj):
+        return self.get_is_in_list(ShoppingCart, obj)
 
     def validate(self, data):
         ingredients = self.initial_data.get('ingredients')

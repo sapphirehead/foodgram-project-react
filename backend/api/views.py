@@ -1,17 +1,19 @@
-from api.mixins import AddDelMixin
 from django.db.models import Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
+
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.serializers import SetPasswordSerializer
-from recipes.models import (Favorites, Follow, Ingredient, Recipe,
-                            RecipeIngredient, ShoppingCart, Tag)
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
                                    HTTP_400_BAD_REQUEST)
+
+from api.mixins import AddDelMixin
+from recipes.models import (Favorites, Follow, Ingredient, Recipe,
+                            RecipeIngredient, ShoppingCart, Tag)
 from users.models import User
 
 from .filters import IngredientSearchFilter, RecipeFilter
@@ -22,13 +24,7 @@ from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
                           RecipeSerializer, TagSerializer)
 
 
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    permission_classes = (permissions.AllowAny,)
-
-
-class RecipeViewSet(viewsets.ModelViewSet, AddDelMixin):
+class BaseRecipeViewSet(viewsets.ModelViewSet, AddDelMixin):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     pagination_class = CustomListPagination
@@ -36,23 +32,31 @@ class RecipeViewSet(viewsets.ModelViewSet, AddDelMixin):
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = RecipeFilter
 
+    def add_del_obj(self, model, request, pk=None):
+        if request.method == 'POST':
+            return self.create_obj(model, request.user, pk)
+        elif request.method == 'DELETE':
+            return self.delete_obj(model, request.user, pk)
+        return None
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = (permissions.AllowAny,)
+
+
+class RecipeViewSet(BaseRecipeViewSet):
+
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[permissions.IsAuthenticated])
     def favorite(self, request, pk=None):
-        if request.method == 'POST':
-            return self.create_obj(Favorites, request.user, pk)
-        elif request.method == 'DELETE':
-            return self.delete_obj(Favorites, request.user, pk)
-        return None
+        return self.add_del_obj(Favorites, request, pk)
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[permissions.IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        if request.method == 'POST':
-            return self.create_obj(ShoppingCart, request.user, pk)
-        elif request.method == 'DELETE':
-            return self.delete_obj(ShoppingCart, request.user, pk)
-        return None
+        return self.add_del_obj(ShoppingCart, request, pk)
 
     @action(
         detail=False, url_path='download_shopping_cart',
@@ -96,7 +100,9 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     def subscribe(self, request, pk):
         if request.method == 'POST':
             author = get_object_or_404(User, id=pk)
-            if Follow.objects.filter(user=request.user, author=author).exists():
+            if Follow.objects.filter(
+                    user=request.user, author=author
+            ).exists():
                 return Response(
                     {'errors': f'{request.user.username} '
                                f'уже подписан на {author.username}'},
