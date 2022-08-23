@@ -110,10 +110,10 @@ class RecipeSerializer(BaseRecipeSerializer):
                   'cooking_time')
         read_only_fields = ('is_favorite', 'is_shopping_cart')
 
-    def favorited(self, obj):
+    def get_is_favorited(self, obj):
         return self.get_is_in_list(Favorites, obj)
 
-    def shopping_cart(self, obj):
+    def get_is_in_shopping_cart(self, obj):
         return self.get_is_in_list(ShoppingCart, obj)
 
     def validate(self, data):
