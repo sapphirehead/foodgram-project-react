@@ -61,12 +61,13 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-          # passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker-compose stop
-            sudo docker rm -f backend frontend
-            sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:v1
-            sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v1
+            # sudo docker-compose stop
+            # sudo docker rm -f backend frontend
+            # sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:v1
+            # sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v1
+            sudo docker-compose down
+            sudo docker image prune -a
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:v1
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v1           
             rm -f .env
