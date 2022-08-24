@@ -66,11 +66,11 @@ jobs:
             # sudo docker rm -f backend frontend
             # sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:v1
             # sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v1
-            sudo docker-compose down
-            sudo docker image prune -a
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:v1
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v1           
-            rm -f .env
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v1
+            sudo docker-compose stop
+            sudo docker compose rm backend  # frontend
+            # sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:v1           
+            rm .env
             touch .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
@@ -81,8 +81,8 @@ jobs:
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             sudo docker-compose up -d
-            sudo docker-compose exec backend python manage.py migrate
-            sudo docker-compose exec backend python manage.py collectstatic --no-input
+            sudo docker-compose exec -T backend python manage.py migrate
+            sudo docker-compose exec -T backend python manage.py collectstatic --no-input
 
   send_message:
     runs-on: ubuntu-latest
