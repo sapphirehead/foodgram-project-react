@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.serializers import SetPasswordSerializer
-from api.mixins import AddDelMixin
 from recipes.models import (Favorites, Follow, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
 from rest_framework import generics, permissions, viewsets
@@ -16,6 +15,7 @@ from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
 from users.models import User
 
 from .filters import IngredientSearchFilter, RecipeFilter
+from .mixins import AddDelMixin
 from .pagination import CustomListPagination
 from .permissions import AuthorOrReadOnly
 from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
