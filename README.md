@@ -41,7 +41,7 @@ http://158.160.1.252
 
 - Для развёртывания проекта необходимо скачать его в нужную вам директорию, например:
 
-```git clone git@github.com:sapphirehead/yamdb_final.git```
+```git clone git@github.com:sapphirehead/foodgram-project-react.git```
 
 *Нужно установить docker и docker-compose. Настроить Dockerfile, docker-compose.yaml, foodgram.yml согласно вашим данным.*
 *После настроек и push на GitHub проект проверятся тестами и линтером flake8, загружает образ на Docker Hub, разворачивает образ на сервере.*
@@ -185,14 +185,14 @@ sudo docker logs --tail 50 --follow --timestamps <your_container_name>
 
 - Логи можно сохранить в файл командой: 
 
-```docker logs <container_name> > docker.log```
+```sudo docker logs <container_name> > docker.log```
 - или найти в них нужную информацию: 
 
 ```grep <поисковый-запрос>```
 
 - Зайти внутрь контейнера:
 
-```docker exec -it <your_container_name> bash```
+```sudo docker exec -it <your_container_name> bash```
 
 
 

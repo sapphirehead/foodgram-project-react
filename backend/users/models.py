@@ -34,11 +34,7 @@ class User(AbstractUser):
         verbose_name='Фамилия',
         help_text='Введите фамилию'
     )
-    password = models.CharField(
-        max_length=150,
-        verbose_name='Пароль',
-        help_text='Введите пароль'
-    )
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('username', 'first_name', 'last_name',)
 
