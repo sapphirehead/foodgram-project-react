@@ -62,15 +62,9 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # sudo docker-compose stop
-            # sudo docker rm -f backend frontend
-            # sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:v1
-            # sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v1
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v1
             sudo docker-compose stop
-            sudo docker rm backend  # frontend
-            # sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:v1           
-            #sudo rm .env
+            sudo docker rm backend
             touch .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
@@ -80,7 +74,7 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            sudo docker-compose up -d
+            sudo docker-compose up -d --build
             sudo docker-compose exec -T backend python manage.py migrate
             sudo docker-compose exec -T backend python manage.py collectstatic --no-input
 

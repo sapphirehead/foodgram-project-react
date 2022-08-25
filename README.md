@@ -43,8 +43,35 @@ http://158.160.1.252
 
 ```git clone git@github.com:sapphirehead/yamdb_final.git```
 
-*Нужно установить docker & docker-compose. Настроить Dockerfile, docker-compose.yaml, yamdb_workflow.yml согласно вашим данным.*
+*Нужно установить docker и docker-compose. Настроить Dockerfile, docker-compose.yaml, foodgram.yml согласно вашим данным.*
 *После настроек и push на GitHub проект проверятся тестами и линтером flake8, загружает образ на Docker Hub, разворачивает образ на сервере.*
+
+- Выполните вход на свой удаленный сервер:
+
+```
+ssh <YOUR_USERNAME>@<IP_ADDRESS>
+```
+- Установите docker на сервер:
+
+```sudo apt install docker.io```
+
+- Установите docker-compose на сервер:
+
+```
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
+```sudo chmod +x /usr/local/bin/docker-compose```
+
+- отредактируйте файл infra/nginx.conf, в строке server_name впишите свой IP.
+
+- Скопируйте файлы из каталога infra: infra/docker-compose.yml и infra/nginx.conf из вашего проекта на сервер в home/<ваш_username>/docker-compose.yml и home/<ваш_username>/nginx.conf соответственно. Введите команду из корневой папки проекта:
+
+```
+scp docker-compose.yml <username>@<host>:/home/<username>/docker-compose.yml
+```
+```
+scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
+```
 
 - В директории infra создайте файл .env с переменными окружения для работы с базой данных, например такой:
 
